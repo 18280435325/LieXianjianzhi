@@ -12,7 +12,7 @@
 */
 
 $app->get('/', function () use ($app) {
-//    return $app->version();
+    return $app->version();
 });
 
 $app->group(['prefix'=>'wx'],function()use($app){
