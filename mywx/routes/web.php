@@ -11,10 +11,9 @@
 |
 */
 
-$app->get('test/aaa', function () use ($app) {
+$app->get('wx/test', function () use ($app) {
     return $app->version();
 });
-
 
 $app->group(['prefix'=>'wx'],function()use($app){
    $app->get('index','WxCheckController@index');
