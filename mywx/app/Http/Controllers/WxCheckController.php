@@ -43,7 +43,7 @@ class WxCheckController extends Controller
     {
         try{
             $weiXinInfo = $this->request->all();
-            $param = [env('wx_url_token') ,$weiXinInfo['timestamp'],'nonce'];
+            $param = [env('wx_url_token') ,$weiXinInfo['timestamp'],$weiXinInfo['nonce']];
             sort($param,SORT_STRING);
             $requestString = sha1(implode($param));
             if($requestString===$weiXinInfo['signature']){
