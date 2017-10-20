@@ -10,6 +10,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\WeixinServices;
+use EasyWeChat\Foundation\Application;
+
 
 
 
@@ -28,12 +30,12 @@ class WxCheckController extends Controller
 
     public function index()
     {
+        dd(33);
         if(env('WX_IS_MEG')){  //第一次验证
             $this->urlCheck();
         }else{   //消息处理
-
+        //    $this->msgTypeSeparate();
         }
-
     }
 
     /** 微信回调地址检测
@@ -65,12 +67,10 @@ class WxCheckController extends Controller
 
     }
 
-
-
-
     public function msgTypeSeparate()
     {
-
+        $app = new Application();
+        dd($app);
     }
 
 }

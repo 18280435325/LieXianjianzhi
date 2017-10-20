@@ -47,8 +47,10 @@ $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,
     App\Console\Kernel::class
 );
+
 $app->configure('code');
 $app->configure('config');
+$app->configure('wechat');
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
