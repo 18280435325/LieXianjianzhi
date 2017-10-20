@@ -30,11 +30,11 @@ class WxCheckController extends Controller
 
     public function index()
     {
-        dd(33);
+
         if(env('WX_IS_MEG')){  //第一次验证
             $this->urlCheck();
         }else{   //消息处理
-        //    $this->msgTypeSeparate();
+            $this->msgTypeSeparate();
         }
     }
 
