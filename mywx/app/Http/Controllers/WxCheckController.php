@@ -69,8 +69,20 @@ class WxCheckController extends Controller
 
     public function msgTypeSeparate()
     {
-        $app = new Application();
-        dd($app);
+        $option = [
+            'debug'  => true,
+            'app_id' =>config('wechat.app_id'),
+            'secret' => config('wechat.secret'),
+            'token'  =>config('wechat.token')
+        ];
+        $app = new Application($option);
+        $server = $app->server;
+        // dd($server->getMessage());
+        $server->setMessageHandler(function ($message) {
+            return "您好！欢迎关注我!";
+        });
+        $response = $server->serve();
+        return $response;
     }
 
 }
