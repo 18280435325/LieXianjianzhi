@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0"/>
+    <title>兼职列表</title>
+    <!-- 引入Vue -->
+    <script src="js/vue.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="//unpkg.com/iview/dist/styles/iview.css">
+    <!-- 引入组件库 -->
+    <script src="//unpkg.com/iview@1.0.1/dist/iview.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.3.4"></script>
+    <link rel="stylesheet" href="css/list.css"/>
+</head>
+<body>
+<div id="app">
+    <p id="search">
+        <i-input :value.sync="searchText"  placeholder="请输入你要查找的兼职" style="width: 70%"></i-input>
+        <i-button type="primary"  v-on:click="search" icon="ios-search">搜索</i-button>
+    </p>
+    <!--顶部导航-->
+    <Affix>
+        <div style="width: 100%;height: 70px;border: 1px solid transparent;background-color: white">
+            <ul id="topMenu">
+                <li v-on:click="allJob()"><img  src="img/all_icon.png" alt=""/> 全部兼职<hr v-if="hrShow==1"/></li>
+                <li v-on:click="hitMoneyJob"><img  src="img/gaoxin_icon.png" alt=""/>高薪兼职<hr v-if="hrShow==2"/></li>
+                <li v-on:click="hotJob"><img  src="img/hot_icon.png" alt=""/>火热兼职<hr v-if="hrShow==3"/></li>
+                <li v-on:click="comprehensiveJob"><img  src="img/zh_icon.png" alt=""/>综合排序<hr v-if="hrShow==4"/></li>
+            </ul>
+        </div>
+    </Affix>
+    <!--兼职列表-->
+    <div id="list"  style="margin-top: 10px;">
+        <ul>
+            <li v-on:click="getInfo(job.pid)"  v-for="(index,job) in jobList" v-model="jobList[index]">
+                <Card>
+                <h4>{{job.title}}
+                    <span style="float: right;font-size: 15px;color: orangered;margin-top: 10px;">{{job.wages}}/{{job.labor_hour_type}}</span>
+                </h4>
+                <p>
+                    <img src="img/address_icon.png" alt=""/>
+                    <span>{{job.address}} </span>
+                    <img title="截止时间" style="margin-left: 10px" src="img/time_icon.png" alt=""/>
+                    <span title="截止时间">{{job.end_time}} </span>
+                </p>
+                    <span style="font-size: 12px;margin-top: 5px;">{{job.clear_type}}</span>
+                </Card>
+            </li>
+        </ul>
+    </div>
+    <Modal :visible.sync="showInfo" v-model="jobInfo"  scrollable="true">
+      <p><h2>{{jobInfo.title}}</h2></p>
+      <p style="margin-top: 10px;"><span style="font-size: 16px;color: orangered;margin-top: 10px;">
+            {{jobInfo.wages}}  <span style="font-size: 12px"> 元 /  {{jobInfo.labor_hour_type}}</span> </span></p>
+        <p>{{jobInfo.clear_type}} | {{jobInfo.upper_limit}}人</p>
+        <div style="margin-top: 10px;">
+           <h4 style="margin-top: 5px">职位描述</h4>
+          {{jobInfo.content}}
+        </div>
+        <div style="margin-top: 10px;">
+            <h4 style="margin-top: 5px">其他说明</h4>
+            {{jobInfo.description}}
+        </div>
+        <div style="margin-top: 10px;">
+            <h4 style="margin-top: 5px">薪资福利</h4>
+           <p style="background-color: #f5f5f5;margin-top: 5px">{{jobInfo.clear_type}}， {{jobInfo.wages}}/{{jobInfo.labor_hour_type}}</p>
+        </div>
+        <div  style="margin-top: 10px;">
+            <h4 style="margin-top: 5px">工作时间</h4>
+            开始日期： {{jobInfo.start_time}}
+            <p></p>
+            截止日期 {{jobInfo.end_time}}
+        </div>
+        <div  style="margin-top: 10px;">
+            <h4 style="margin-top: 5px">工作地点：{{jobInfo.address}}</h4>
+        </div>
+        <div slot="footer">
+            <div><h2 style="margin-left: 20px;!important;"><img style="width: 20px;height: 20px" src="img/phone_icon.png" alt=""/>
+               <span>联系电话：</span> <a href="tel:18280435325">18280435325</a></h2></div>
+        </div>
+    </Modal>
+    <Back-top></Back-top>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            visible: '',
+            hrShow:1,
+            jobList:[],
+            showInfo:false,
+            jobInfo:[],
+            searchText:''
+        },
+        ready:function(){
+            this.getJobList({length:100});
+        },
+        methods:{
+            allJob:function(){
+              this.hrShow=1;
+                //获取所有兼职
+                this.getJobList({length:100});
+            },
+            hitMoneyJob:function(){
+                this.hrShow=2;
+                //获取高薪兼职
+                this.getJobList({length:100,order_by:'money'});
+            },
+            hotJob:function(){
+                this.hrShow=3;
+                //获取火热兼职
+                this.getJobList({length:100,order_by:'hot'});
+            },
+            comprehensiveJob:function(){
+                this.hrShow=4;
+                this.getJobList({length:100,order_by:'comprehensive'});
+            },
+            getJobList:function(search){
+                this.$http.get(
+                  'phpApi/index.php/job/joblist',{params:search}
+                ).then(function(data){
+                           var list = data.body;
+                           if(list.code!=200){
+                               this.$Notice.error({
+                                   title: '错误',
+                                   desc: nodesc ? '' :list.errInfo
+                               });
+                           }
+                          //追加工作列表
+                     //       this.jobList = Object.assign(this.jobList,list.data);
+//                            this.jobList = this.jobList.concat(list.data);
+                            this.jobList =list.data;
+                        },function(){   //错误回调
+
+                        });
+            },
+            getInfo:function(pid){
+                this.$http.get(
+                        'phpApi/index.php/job/getinfo',{params:{job_id:pid}}
+                ).then(function(data){
+                            var list = data.body;
+                            if(list.code!=200){
+                                this.$Notice.error({
+                                    title: '错误',
+                                    desc:list.errInfo
+                                });
+                            }
+                            //追加工作列表
+                            //       this.jobList = Object.assign(this.jobList,list.data);
+                            this.jobInfo = list.data;
+                            this.showInfo = true;
+                        },function(){   //错误回调
+
+                        });
+            },
+            search:function(){
+                if(this.searchText!=''){
+                    this.getJobList({length:100,keywords:this.searchText});
+                }else{
+                    this.getJobList({length:100});
+                }
+            }
+        }
+
+    });
+
+</script>
+</body>
+</html>

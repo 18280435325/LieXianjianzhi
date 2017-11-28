@@ -1,0 +1,12 @@
+{
+    "name":"lieXian",
+    "require": {
+        "catfan/Medoo": "^1.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Config\\":"config/"
+        }
+    }
+}
